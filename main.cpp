@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     QFileDialog *dialog = new QFileDialog(0,"Scegli la cartella...",QDir::home().absolutePath());
-    dialog->setFileMode(QFileDialog::DirectoryOnly);
+    dialog->setFileMode(QFileDialog::Directory);
     dialog->setWindowModality(Qt::WindowModal);
     dialog->setViewMode(QFileDialog::Detail);
 
