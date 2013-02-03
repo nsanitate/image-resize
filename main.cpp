@@ -24,6 +24,7 @@
 
 #include <QApplication>
 #include <QFileDialog>
+#include <QMessageBox>
 #include <QProgressDialog>
 #include <QStringBuilder>
 #include <QDebug>
@@ -32,33 +33,35 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    QFileDialog dialog(0,"Scegli la cartella...",QDir::home().absolutePath());
-    dialog.setFileMode(QFileDialog::DirectoryOnly);
-    dialog.setWindowModality(Qt::WindowModal);
-    dialog.setViewMode(QFileDialog::Detail);
+    QFileDialog *dialog = new QFileDialog(0,"Scegli la cartella...",QDir::home().absolutePath());
+    dialog->setFileMode(QFileDialog::DirectoryOnly);
+    dialog->setWindowModality(Qt::WindowModal);
+    dialog->setViewMode(QFileDialog::Detail);
 
-    if (dialog.exec())
+    if (dialog->exec())
     {
-        QDir directory(dialog.directory());
+        QDir *directory = new QDir(dialog->directory());
 
-        qDebug() << "Scelta la directory: " << directory.absolutePath();
-        qDebug() << "Trovati numero files: " << directory.count();
+        qDebug() << "Scelta la directory: " << directory->absolutePath();
+        qDebug() << "Trovati numero files: " << directory->count();
 
-        QProgressDialog progress("Ridimensionamento immagini...", "Cancella", 0, directory.count());
-        progress.setWindowModality(Qt::WindowModal);
+        QProgressDialog *progress = new QProgressDialog("Ridimensionamento immagini...", "Cancella", 0, directory->count());
+        progress->setWindowModality(Qt::WindowModal);
 
-        QStringList files = directory.entryList();
-        QString resized_path = directory.absolutePath() % QDir::separator() % "Ridimensionate";
-        QDir resized_dir(resized_path);
+        QStringList files = directory->entryList();
+        QString resized_path = directory->absolutePath() % QDir::separator() % "Ridimensionate";
+        QDir *resized_dir = new QDir(resized_path);
 
-        if (!resized_dir.exists())
-           resized_dir.mkpath(resized_path);
+        if (!resized_dir->exists())
+           resized_dir->mkpath(resized_path);
+
+        int image_num = 0;
 
         for (int i = 0; i < files.count(); ++i)
         {
-            progress.setValue(i);
+            progress->setValue(i);
 
-            if (progress.wasCanceled())
+            if (progress->wasCanceled())
                 break;
 
             QString file(files.at(i));
@@ -67,16 +70,19 @@ int main(int argc, char *argv[])
             {
                 qDebug() << "Trovata questa immagine: " << file;
 
-                QPixmap file_image(directory.absoluteFilePath(file));
+                QPixmap *file_image = new QPixmap(directory->absoluteFilePath(file));
                 QSize size(1280,960);
-                QPixmap resized_image(file_image.scaled(size));
-                resized_image.save(resized_dir.absoluteFilePath(file));
+                QPixmap *resized_image = new QPixmap(file_image->scaled(size));
+                resized_image->save(resized_dir->absoluteFilePath(file));
+                image_num++;
 
                 qDebug() << "Immagine ridimensionata: " << file;
             }
         }
 
-        progress.setValue(directory.count());
+        progress->setValue(directory->count());
+
+        QMessageBox::information(0,"Operazione terminata",QString("Il programma ha convertito %1 immagini").arg(image_num),QMessageBox::Ok);
     }
     return EXIT_SUCCESS;
 }
